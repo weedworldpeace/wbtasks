@@ -1,0 +1,5 @@
+apple 30 red
+banana 20 yellow
+cherry 10 red
+apple 5 green
+banana 20 yellow
