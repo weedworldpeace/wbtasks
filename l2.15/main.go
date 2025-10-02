@@ -54,8 +54,14 @@ func execWrap(ctx context.Context, cmdSplitted []string, inp string) ([]byte, er
 		if err != nil {
 			return []byte{}, err
 		}
-		writer.Write([]byte(inp))
-		writer.Close()
+		_, err = writer.Write([]byte(inp))
+		if err != nil {
+			return []byte{}, err
+		}
+		err = writer.Close()
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 	return cmd.CombinedOutput()
 }
@@ -115,14 +121,14 @@ func runCmd(row string, ctx context.Context, callbackCh chan bool) {
 				close(callbackCh)
 				return
 			}
-			lastOut = fmt.Sprintf("%s", res)
+			lastOut = string(res)
 		default:
 			out, err := execWrap(ctx, cmdSplitted, lastOut)
 			if err != nil {
 				close(callbackCh)
 				return
 			}
-			lastOut = fmt.Sprintf("%s", string(out))
+			lastOut = string(out)
 		}
 	}
 	fmt.Print(lastOut)
