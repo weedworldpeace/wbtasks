@@ -2,13 +2,15 @@ package transport
 
 import (
 	"calendar/internal/models"
+	"calendar/internal/repository"
 	"calendar/pkg/logger"
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -23,13 +25,23 @@ type handlers struct {
 }
 
 func (h *handlers) writeBadResponse(w http.ResponseWriter, r *http.Request, err error) {
-	lg := logger.LoggerFromCtx(h.ctx).Lg
+	lg := logger.LoggerFromCtx(r.Context()).Lg
 	lg.Error(err.Error())
+
+	if errors.Is(err, errBadMethod) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	} else if errors.Is(err, repository.ErrNonExistEventId) || (errors.Is(err, repository.ErrNonExistUserId)) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	res, err := json.Marshal(models.NewBadResponse(err))
 	if err != nil {
 		lg.Error(err.Error())
+		return
 	}
+
 	_, err = w.Write(res)
 	if err != nil {
 		lg.Error(err.Error())
@@ -37,52 +49,49 @@ func (h *handlers) writeBadResponse(w http.ResponseWriter, r *http.Request, err 
 }
 
 func (h *handlers) writeGoodPostResponse(w http.ResponseWriter, r *http.Request, message string) {
-	lg := logger.LoggerFromCtx(h.ctx).Lg
+	lg := logger.LoggerFromCtx(r.Context()).Lg
 
 	res, err := json.Marshal(models.NewGoodPostResponse(message))
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lg.Error(err.Error())
+		return
 	}
 
-	w.WriteHeader(200)
 	_, err = w.Write(res)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lg.Error(err.Error())
 	}
 }
 
 func (h *handlers) writeGoodGetResponse(w http.ResponseWriter, r *http.Request, events []models.Event) {
-	lg := logger.LoggerFromCtx(h.ctx).Lg
+	lg := logger.LoggerFromCtx(r.Context()).Lg
 
 	res, err := json.Marshal(models.NewGoodGetResponse(events))
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lg.Error(err.Error())
+		return
 	}
 
 	_, err = w.Write(res)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lg.Error(err.Error())
 	}
 }
 
-func (h *handlers) middleware(next http.Handler) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		lg := logger.LoggerFromCtx(h.ctx).Lg
-		lg.Info(fmt.Sprintf("received request %s %s", r.Method, r.URL))
-		next.ServeHTTP(w, r)
-	}
-}
-
-func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) processPost(w http.ResponseWriter, r *http.Request) (*models.UserEvent, bool) {
 	if r.Method != http.MethodPost {
 		h.writeBadResponse(w, r, errBadMethod)
-		return
+		return nil, false
 	}
 
 	raw, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.writeBadResponse(w, r, err)
-		return
+		return nil, false
 	}
 
 	userEvent := models.NewUserEvent()
@@ -90,10 +99,50 @@ func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(raw, userEvent)
 	if err != nil {
 		h.writeBadResponse(w, r, err)
+		return nil, false
+	}
+
+	return userEvent, true
+}
+
+func (h *handlers) processGet(w http.ResponseWriter, r *http.Request) (string, string, bool) {
+	if r.Method != http.MethodGet {
+		h.writeBadResponse(w, r, errBadMethod)
+		return "", "", false
+	}
+
+	values := r.URL.Query()
+	if !values.Has("user_id") {
+		h.writeBadResponse(w, r, errNoUserId)
+		return "", "", false
+	}
+	if !values.Has("date") {
+		h.writeBadResponse(w, r, errNoDate)
+		return "", "", false
+	}
+	return values.Get("user_id"), values.Get("date"), true
+}
+
+func (h *handlers) middleware(next http.Handler) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lg := logger.LoggerFromCtx(h.ctx)
+		requestId := uuid.NewString()
+		lgWithReqId := lg.LoggerWithRequestId(requestId)
+
+		lgWithReqId.Lg.Info("received request", "method", r.Method, "url", r.URL.String())
+
+		r = r.WithContext(context.WithValue(r.Context(), logger.LoggerKey, lgWithReqId))
+		next.ServeHTTP(w, r)
+	}
+}
+
+func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
+	userEvent, toContinue := h.processPost(w, r)
+	if !toContinue {
 		return
 	}
 
-	err = h.service.CreateEvent(userEvent)
+	err := h.service.CreateEvent(userEvent)
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return
@@ -102,26 +151,12 @@ func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.writeBadResponse(w, r, errBadMethod)
+	userEvent, toContinue := h.processPost(w, r)
+	if !toContinue {
 		return
 	}
 
-	raw, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.writeBadResponse(w, r, err)
-		return
-	}
-
-	userEvent := models.NewUserEvent()
-
-	err = json.Unmarshal(raw, userEvent)
-	if err != nil {
-		h.writeBadResponse(w, r, err)
-		return
-	}
-
-	err = h.service.UpdateEvent(userEvent)
+	err := h.service.UpdateEvent(userEvent)
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return
@@ -131,26 +166,12 @@ func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) deleteEvent(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		h.writeBadResponse(w, r, errBadMethod)
+	userEvent, toContinue := h.processPost(w, r)
+	if !toContinue {
 		return
 	}
 
-	raw, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.writeBadResponse(w, r, err)
-		return
-	}
-
-	userEvent := models.NewUserEvent()
-
-	err = json.Unmarshal(raw, userEvent)
-	if err != nil {
-		h.writeBadResponse(w, r, err)
-		return
-	}
-
-	err = h.service.DeleteEvent(userEvent)
+	err := h.service.DeleteEvent(userEvent)
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return
@@ -160,17 +181,12 @@ func (h *handlers) deleteEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) eventsForDay(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	if !values.Has("user_id") {
-		h.writeBadResponse(w, r, errNoUserId)
-		return
-	}
-	if !values.Has("date") {
-		h.writeBadResponse(w, r, errNoDate)
+	userId, date, toContinue := h.processGet(w, r)
+	if !toContinue {
 		return
 	}
 
-	events, err := h.service.ReadEvents(values.Get("user_id"), values.Get("date"), "day")
+	events, err := h.service.ReadEvents(userId, date, "day")
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return
@@ -180,17 +196,12 @@ func (h *handlers) eventsForDay(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) eventsForWeek(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	if !values.Has("user_id") {
-		h.writeBadResponse(w, r, errNoUserId)
-		return
-	}
-	if !values.Has("date") {
-		h.writeBadResponse(w, r, errNoDate)
+	userId, date, toContinue := h.processGet(w, r)
+	if !toContinue {
 		return
 	}
 
-	events, err := h.service.ReadEvents(values.Get("user_id"), values.Get("date"), "week")
+	events, err := h.service.ReadEvents(userId, date, "week")
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return
@@ -200,17 +211,12 @@ func (h *handlers) eventsForWeek(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) eventsForMonth(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	if !values.Has("user_id") {
-		h.writeBadResponse(w, r, errNoUserId)
-		return
-	}
-	if !values.Has("date") {
-		h.writeBadResponse(w, r, errNoDate)
+	userId, date, toContinue := h.processGet(w, r)
+	if !toContinue {
 		return
 	}
 
-	events, err := h.service.ReadEvents(values.Get("user_id"), values.Get("date"), "month")
+	events, err := h.service.ReadEvents(userId, date, "month")
 	if err != nil {
 		h.writeBadResponse(w, r, err)
 		return

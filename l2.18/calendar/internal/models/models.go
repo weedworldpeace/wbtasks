@@ -1,14 +1,9 @@
 package models
 
-type EventDate struct {
-	RawTime  string `json:"date"`
-	UnixTime int64
-}
-
 type Event struct {
 	EventId string `json:"event_id"`
 	Message string `json:"event"`
-	EventDate
+	Date    string `json:"date"`
 }
 
 type UserEvent struct {

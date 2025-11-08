@@ -1,11 +1,15 @@
 package data
 
-import "calendar/internal/models"
+import (
+	"calendar/internal/models"
+	"sync"
+)
 
 type Data struct {
 	Users map[string][]models.Event
+	Mu    sync.RWMutex
 }
 
 func New() *Data {
-	return &Data{make(map[string][]models.Event)}
+	return &Data{Users: make(map[string][]models.Event)}
 }

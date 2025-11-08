@@ -6,12 +6,17 @@ import (
 	"os"
 )
 
-const (
-	ContextLogger = "logger"
-)
+type stringContext string
+
+const LoggerKey stringContext = "logger"
+const requestIdKey = "requestId"
 
 type Logger struct {
 	Lg *slog.Logger
+}
+
+func (l *Logger) LoggerWithRequestId(requestId string) *Logger {
+	return &Logger{l.Lg.With(requestIdKey, requestId)}
 }
 
 func New() *Logger {
@@ -19,7 +24,7 @@ func New() *Logger {
 }
 
 func LoggerFromCtx(ctx context.Context) *Logger {
-	if raw := ctx.Value(ContextLogger); raw != nil {
+	if raw := ctx.Value(LoggerKey); raw != nil {
 		return raw.(*Logger)
 	}
 	panic("failed to extract logger")
