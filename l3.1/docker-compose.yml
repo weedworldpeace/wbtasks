@@ -1,0 +1,41 @@
+services:
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: dockerfile.rabbitmq
+    container_name: rabbitmq
+    ports:
+      - ":5672"
+      # - "15672:15672" # UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - ":1025"  # SMTP
+      - "8025:8025"
+  notif:
+    build:
+      context: ./app
+      dockerfile: dockerfile
+    container_name: notif_service
+    ports:
+      - "8080:8080"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
+      - EMAIL_SENDER_HOST=mailhog
+      - EMAIL_SENDER_PORT=1025
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+    depends_on:
+      - rabbitmq
+      - mailhog
+    restart: always
+
+volumes:
+  rabbitmq_data:
