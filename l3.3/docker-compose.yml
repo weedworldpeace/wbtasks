@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:18.1-alpine
+    container_name: url-shortener-db
+    environment:
+      POSTGRES_USER: shortener
+      POSTGRES_PASSWORD: shortener_pass
+      POSTGRES_DB: url_shortener
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shortener -d url_shortener"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: ./app
+    container_name: comment-tree
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=shortener
+      - DB_PASSWORD=shortener_pass
+      - DB_NAME=url_shortener
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      # - BASE_URL=http://localhost:8080
+    volumes:
+      - ./app/migrations:/app/migrations:ro
+    # restart: unless-stopped
+
+volumes:
+  postgres_data:

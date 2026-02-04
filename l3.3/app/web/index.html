@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommentTree</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>CommentTree</h1>
+    
+    <div id="message" class="message" style="display: none;"></div>
+    
+    <div class="search-section">
+        <input type="text" id="searchInput" placeholder="Поиск комментариев...">
+        <button onclick="searchComments()">Найти</button>
+        <button onclick="clearSearch()">Сброс</button>
+    </div>
+    
+    <div id="commentsTree"></div>
+    
+    <div class="pagination" id="pagination" style="display: none;">
+        <button id="prevBtn" onclick="prevPage()">← Назад</button>
+        <div class="pagination-info" id="pageInfo">Страница 1 из 1</div>
+        <button id="nextBtn" onclick="nextPage()">Вперед →</button>
+    </div>
+    
+    <div class="new-comment-section">
+        <h3>Новый комментарий</h3>
+        <textarea id="commentText" rows="3" placeholder="Ваш комментарий..."></textarea>
+        <input type="text" id="parentId" placeholder="ID родительского комментария (необязательно)" 
+               style="width:100%; padding:8px; margin-bottom:10px;">
+        <button onclick="addComment()">Отправить</button>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
