@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Watermarker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Processing Service</h1>
+        <p class="subtitle">Загрузите изображение и получите три версии: оригинал, с водяным знаком и миниатюру</p>
+        
+        <div class="upload-section">
+            <h2>Загрузка изображения</h2>
+            <form id="uploadForm">
+                <div class="file-input-wrapper">
+                    <input type="file" id="imageInput" accept="image/jpeg,image/png,image/gif" required>
+                    <label for="imageInput" class="file-label">Выберите файл</label>
+                    <span id="fileName">Файл не выбран</span>
+                </div>
+                <button type="submit" id="uploadBtn" disabled>Загрузить</button>
+            </form>
+            <div id="uploadResult" class="result-box hidden">
+                <p>Изображение загружено! ID задачи:</p>
+                <div class="task-id-display">
+                    <code id="taskId"></code>
+                    <button id="copyIdBtn" class="copy-btn">📋</button>
+                </div>
+                <p class="hint">Скопируйте ID и вставьте в поле ниже для просмотра результата</p>
+            </div>
+        </div>
+
+        <div class="divider">
+            <span>или</span>
+        </div>
+
+        <div class="check-section">
+            <h2>Проверка статуса</h2>
+            <div class="task-id-input">
+                <input type="text" id="checkTaskId" placeholder="Введите ID задачи">
+                <button id="checkBtn">Проверить</button>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+
+        <div id="errorMessage" class="error hidden"></div>
+
+        <div id="resultsSection" class="results-section hidden">
+            <h2>Результаты обработки</h2>
+            <div class="status-badge" id="taskStatus"></div>
+            <div class="images-grid" id="imagesGrid">
+            </div>
+            <div style="margin-top: 30px; text-align: center;">
+                <button id="deleteBtn" class="delete-btn hidden">🗑️ Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

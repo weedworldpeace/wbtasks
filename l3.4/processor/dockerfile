@@ -1,0 +1,27 @@
+FROM golang:latest AS builder
+
+WORKDIR /app
+
+# RUN apk add --no-cache git
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o processor ./cmd
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+# WORKDIR /root/
+
+COPY --from=builder /app/processor .
+# COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/watermark.png .
+
+# RUN addgroup -g 1000 -S appgroup && adduser -u 1000 -S appuser -G appgroup
+# USER appuser
+
+CMD ["./processor"]
