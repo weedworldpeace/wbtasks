@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Event Booking</title>
+    <link rel="stylesheet" href="/admin/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎫 Административная панель</h1>
+        
+        <div class="admin-section">
+            <h2>Управление мероприятиями</h2>
+            <button id="showCreateEventBtn" class="btn-primary">➕ Создать мероприятие</button>
+            
+            <div id="createEventForm" class="form-container hidden">
+                <h3>Новое мероприятие</h3>
+                <form onsubmit="app.createEvent(event)">
+                    <div class="form-group">
+                        <label>Название:</label>
+                        <input type="text" name="title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Дата и время:</label>
+                        <input type="datetime-local" name="date" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Количество мест:</label>
+                            <input type="number" name="total_seats" min="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Цена (₽):</label>
+                            <input type="number" name="price" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Время на подтверждение (минуты):</label>
+                        <input type="number" name="time_to_confirm" min="1" value="30" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">Создать</button>
+                        <button type="button" class="btn-cancel" onclick="app.hideCreateForm()">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="events-section">
+            <h2>Все мероприятия</h2>
+            <div id="eventsContainer" class="events-grid">
+                <div class="loading">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/static/script.js"></script>
+</body>
+</html>

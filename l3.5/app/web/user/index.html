@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Portal - Event Booking</title>
+    <link rel="stylesheet" href="/user/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎫 Система бронирования мероприятий</h1>
+
+        <div class="events-section">
+            <h2>Доступные мероприятия</h2>
+            <div id="eventsContainer" class="events-grid">
+                <div class="loading">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookingModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Бронирование места</h3>
+            <form onsubmit="app.submitBooking(event)">
+                <input type="hidden" id="bookingEventId" name="event_id">
+                
+                <div class="form-group">
+                    <label>Ваше имя:</label>
+                    <input type="text" id="bookingUserName" name="user_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="bookingUserEmail" name="user_email" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Забронировать</button>
+                    <button type="button" class="btn-cancel" onclick="app.hideBookingModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/user/static/script.js"></script>
+</body>
+</html>
