@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Service</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Transaction Service</h1>
+
+        <div class="create-transaction">
+            <h3>Create New Transaction</h3>
+            <div class="create-form">
+                <input type="number" id="newAmount" placeholder="Amount" step="0.01">
+                <select id="newType">
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <input type="text" id="newCategory" placeholder="Category">
+                <input type="text" id="newDescription" placeholder="Description">
+                <button onclick="createTransaction()">Create</button>
+            </div>
+        </div>
+        
+        <div class="date-range">
+            <input type="date" id="fromDate">
+            <input type="date" id="toDate">
+            <button onclick="loadData()">Apply</button>
+        </div>
+
+        <div class="analytics" id="analytics">
+            <h2>Analytics</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>Total</h3>
+                    <p id="totalCount">0</p>
+                </div>
+                <div class="analytics-card">
+                    <h3>Sum</h3>
+                    <p>Income: <span id="sumIncome">0</span></p>
+                    <p>Expense: <span id="sumExpense">0</span></p>
+                    <p>Total: <span id="sumTotal">0</span></p>
+                </div>
+                <div class="analytics-card">
+                    <h3>Average</h3>
+                    <p>Income: <span id="avgIncome">0</span></p>
+                    <p>Expense: <span id="avgExpense">0</span></p>
+                    <p>Total: <span id="avgTotal">0</span></p>
+                </div>
+                <div class="analytics-card">
+                    <h3>Median</h3>
+                    <p>Income: <span id="medianIncome">0</span></p>
+                    <p>Expense: <span id="medianExpense">0</span></p>
+                    <p>Total: <span id="medianTotal">0</span></p>
+                </div>
+                <div class="analytics-card">
+                    <h3>90th Percentile</h3>
+                    <p>Income: <span id="perc90Income">0</span></p>
+                    <p>Expense: <span id="perc90Expense">0</span></p>
+                    <p>Total: <span id="perc90Total">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="transactions">
+            <h2>Transactions</h2>
+            <div id="transactionsList"></div>
+            <button id="loadMoreBtn" onclick="loadMore()" style="display: none;">...</button>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
