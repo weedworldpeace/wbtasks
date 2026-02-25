@@ -16,7 +16,7 @@ func New() *Config {
 
 	err := cleanenv.ReadEnv(cfg)
 	if err != nil {
-		panic(fmt.Sprintf("failed to extract logger: %v", err))
+		panic(fmt.Sprintf("failed to extract config: %v", err))
 	}
 
 	return cfg
