@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items Management</title>
+    <link rel="stylesheet" href="/home/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Items Management</h1>
+
+        <button class="toggle-btn" onclick="toggleCreate()">+ Create New Item</button>
+        
+        <div id="createForm" class="create-form" style="display: none;">
+            <h3>Create New Item</h3>
+            <input type="text" id="newName" placeholder="Name">
+            <input type="text" id="newDescription" placeholder="Description">
+            <input type="number" id="newQuantity" placeholder="Quantity" step="1">
+            <input type="number" id="newPrice" placeholder="Price" step="0.01">
+            <button onclick="createItem()">Create</button>
+        </div>
+
+        <div class="section">
+            <h2>Current Items</h2>
+            <div id="itemsList"></div>
+            <button id="loadMoreItemsBtn" onclick="loadMoreItems()" style="display: none;">...</button>
+        </div>
+
+        <div class="section">
+            <h2>History</h2>
+            <div id="historyList"></div>
+            <button id="loadMoreHistoryBtn" onclick="loadMoreHistory()" style="display: none;">...</button>
+        </div>
+    </div>
+
+    <script src="/home/static/script.js"></script>
+</body>
+</html>

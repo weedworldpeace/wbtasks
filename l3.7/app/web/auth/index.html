@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth - Select Role</title>
+    <link rel="stylesheet" href="/auth/static/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <a href="/home" class="home-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Home
+        </a>
+
+        <div class="auth-box">
+            <h1>Select Your Role</h1>
+            <p>Choose a role to get access token</p>
+            
+            <select id="roleSelect" class="role-select">
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="viewer">Viewer</option>
+            </select>
+            
+            <button onclick="getToken()" class="auth-btn">Get Access</button>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script src="/auth/static/script.js"></script>
+</body>
+</html>
