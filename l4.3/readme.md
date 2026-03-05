@@ -43,8 +43,8 @@
 ### 5. Тестирование
     curl -X POST http://127.0.0.1:8080/create_event?email=example@example.com -d '{"user_id": "445393bc-0863-4514-8272-167e54096140","message": "cre",      "date": "2026-03-04T15:00:00Z"}'  -  создание события
 
-    curl -X POST http://127.0.0.1:8080/update_event?email=example@example.com -d '{"user_id": "445393bc-0863-4514-8272-167e54096140","event_id": "07fa23a8-ede2-419b-a0c7-9bf8d3813477","message": "upt","date": "2026-03-02T14:00:00Z"}'  -  обновление события
+    curl -X POST http://127.0.0.1:8080/update_event -d '{"user_id": "445393bc-0863-4514-8272-167e54096140","event_id": "07fa23a8-ede2-419b-a0c7-9bf8d3813477","message": "upt","date": "2026-03-02T14:00:00Z"}'  -  обновление события
 
-    curl -X POST http://127.0.0.1:8080/delete_event?email=example@example.com -d '{"user_id": "445393bc-0863-4514-8272-167e54096140","event_id": "07fa23a8-ede2-419b-a0c7-9bf8d3813477","message": "upt","date": "2026-03-02T14:00:00Z"}'  -  удаление события
+    curl -X POST http://127.0.0.1:8080/delete_event -d '{"user_id": "445393bc-0863-4514-8272-167e54096140","event_id": "07fa23a8-ede2-419b-a0c7-9bf8d3813477","message": "upt","date": "2026-03-02T14:00:00Z"}'  -  удаление события
 
     curl http://127.0.0.1:8080/events_for_week?user_id=445393bc-0863-4514-8272-167e54096140\&date=2026-03-01T08:18:03Z  -  получение событий
