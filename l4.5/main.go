@@ -15,7 +15,7 @@ func main() {
 
 func badSumHandler(w http.ResponseWriter, r *http.Request) {
 	sum := 0
-	values := []int{}
+	values := make([]int, 0, 100000)
 	for i := 0; i < 100000; i++ {
 		sum += i
 		values = append(values, i)
